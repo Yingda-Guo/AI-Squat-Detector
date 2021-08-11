@@ -1,6 +1,7 @@
 
 # AI-Squat-Detector
 AI Training Project #2: Squat Detecor. An improved algorithm to detect squat. The app supports video load and live-camera-streaming. 
+
 ![squat1](https://user-images.githubusercontent.com/13625416/128951652-95c137cd-9403-423f-b3e4-d9d7ba9f9704.gif)
 ## Environment Setup
 
