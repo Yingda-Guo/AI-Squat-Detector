@@ -23,7 +23,7 @@ def main():
         '-v', '--videoDir',
         help='Video file path',
         type=str,
-        default="squat_resource/squat0.mp4"
+        default="squat_resource/squat2.mp4"
     )
     args = parser.parse_args()
     
