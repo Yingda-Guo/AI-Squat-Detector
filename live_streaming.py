@@ -19,8 +19,8 @@ def main():
     # Get web camera default is 0
     cap = cv2.VideoCapture(0)
     # Set web camera size, 3 means width and 4 means height
-    cap.set(3, 1260)
-    cap.set(4, 720)
+    cap.set(3, 720)
+    cap.set(4, 1260)
 
     # FPS initial value
     pTime = 0
