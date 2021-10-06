@@ -1,6 +1,9 @@
 
-# AI-Squat-Detector
-AI Training Project #2: Squat Detecor. An improved algorithm to detect squat. The app supports video load and live-camera-streaming. 
+# Deep Learning AI Trainer - Squat Counter
+
+Combining Computer Vision with Deep Learning Algorithm, this python application can detect human legs in real-time. Based on the angle changes, the application can detect squat movement and count the number of squats. The applicaiton supports a real-time streaming with low hardware requirement, even without a GPU.
+
+This is a upgrade of [Deep Learning AI Trainer: Weight Lift Counter] (https://github.com/Yingda-Guo/Deep-Learning-AI-Trainer-Weight-Lift-Counter) by using more advanced movement detection algorithm
 
 ![squat1](https://user-images.githubusercontent.com/13625416/128951652-95c137cd-9403-423f-b3e4-d9d7ba9f9704.gif)
 ## Environment Setup
