@@ -2,6 +2,8 @@
 
 Process a traning vedio in real-time 
 
+The idea of a valid squat is when both legs angles decrease to a threshold than increase
+
 optional arguments:
   -h, --help            show this help message and exit
   -v VIDEODIR, --videoDir IMAGEDIR
@@ -29,22 +31,21 @@ def main():
 
     # Create object
     detector = pm.poseDetector()
-    # 利用angle的增加和减少来判断direction，当完成一次up和down的时候，算一次count
-    # 所以需要设置up和down的临界值，需要是一个范围，比如up的从170度开始减少，从50度开始增加
-    # 找减少的最小值和增加的最大值
+    
+    # Using leg angles changes to detect a squat
     count = 0
-    # 1是down，0是up
+    # 1 is down 0 is up
     dir = 1
 
-    # 初始阀值
+    # Initial threshold to signal a squat event
     threshold_max = 170
     threshold_min = 120
 
-    # 最大最小值
+    # Detect max and min angles when streaming
     max_angle = float('-inf')
     min_angle = float('inf')
 
-    # threshold ratio
+    # threshold change ratio
     threshold_ratio_up = 0.2
     threshold_ratio_down = 0.5
 
@@ -105,37 +106,43 @@ def main():
             #     if angle_right < min_angle:
             #         min_angle = angle_right
             #         threshold_min = min_angle * (1 + threshold_ratio_down)
-
-            # 找到抛物线
-            # 根据抛物线方向，向上的时候找最大值，向下的时候找最小值
+            
+            # For angles decrease (0), we look for the smaller angle of two sides
+            # For angles increase (1), we look for the lager of the two
             if dir == 1:
                 angle_optimal = angle_left if angle_left > angle_right else angle_right
             else:
                 angle_optimal = angle_left if angle_left < angle_right else angle_right
-
+                
+            # When both angles increase to the maximal threshold
             if angle_optimal > threshold_max:
                 if len(angle_buffer) == 0:
                     if dir == 0:
                         count += 0.5
                         dir = 1
+                        # push the two angles to the buffer
                         angle_buffer.append([angle_left, angle_right])
                 else:
                     angle_left_previous, angle_right_previous = angle_buffer.pop()
+                    # only when both legs' angle decrese or increase at the same time, a valid squat is deteced
                     if (angle_left >= angle_left_previous and angle_right >= angle_right_previous) or (
                             angle_left <= angle_left_previous and angle_right <= angle_right_previous):
                         if dir == 0:
                             count += 0.5
                             dir = 1
                             angle_buffer.append([angle_left, angle_right])
-
+                            
+            # When both angles decreases to a minimal threshold
             if angle_optimal < threshold_min:
                 if len(angle_buffer) == 0:
                     if dir == 1:
                         count += 0.5
                         dir = 0
+                        # push the two angles to the buffer
                         angle_buffer.append([angle_left, angle_right])
                 else:
                     angle_left_previous, angle_right_previous = angle_buffer.pop()
+                    # only when both legs' angle decrese or increase at the same time, a valid squat is deteced
                     if (angle_left >= angle_left_previous and angle_right >= angle_right_previous) or (
                             angle_left <= angle_left_previous and angle_right <= angle_right_previous):
                         if dir == 1:

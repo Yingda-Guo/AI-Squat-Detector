@@ -12,7 +12,7 @@ class poseDetector():
                  smooth=True,
                  detection_conf=0.5,
                  tracking_conf=0.5):
-        # self相当于一个instance内部通用的variable寄存器
+
         # Load media pipe pose estimation model
         self.mpPose = mp.solutions.pose
         self.pose = self.mpPose.Pose(mode, complexity, smooth, detection_conf, tracking_conf)
@@ -22,14 +22,19 @@ class poseDetector():
     # Run pose detection algorithm
     def findPose(self, img, draw = True):
         # 需要将BGR格式的image转化为RGB格式
+        # Convert BGR to RGB
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # run pose estimation for the image
         self.result = self.pose.process(imgRGB)
         # 如果没有监测到，则继续下一帧
+        # If not pose detected, skip to next frame
         if self.result.pose_landmarks:
             if draw:
                 self.mpDraw.draw_landmarks(img, self.result.pose_landmarks, self.mpPose.POSE_CONNECTIONS)
+                
+                
     # 获得所有坐标以及清晰度
+    # Get all pose key points coordinates and predict accuracy
     def findPosition(self, img, draw = True):
         # landmark lists
         self.lmList = []
@@ -37,6 +42,7 @@ class poseDetector():
         if self.result.pose_landmarks:
             h, w, c = img.shape
             # 返回的x,y,z coordinate都是normalized，如果需要获取到具体坐标需要结合现有image dimension
+            # all x, y, z coordinates are normalized, need to use the dimension of the original image to get true coordinates
             for id, lm in enumerate(self.result.pose_landmarks.landmark):
                 # Need to convert ratio to real pixel value
                 cx, cy = int(lm.x * w), int(lm.y * h)
@@ -50,12 +56,14 @@ class poseDetector():
             return self.lmList
 
     # 使用index获取angle
+    # Given 3 pose key points index, draw or find the angle
     def findAngle(self, img, index_p1, index_p2, index_p3, draw = True, acuteAngle=False):
         x1, y1 = self.lmList[index_p1][1:3]
         x2, y2 = self.lmList[index_p2][1:3]
         x3, y3 = self.lmList[index_p3][1:3]
 
         # 根据顶角找到顶角的延伸线
+        # Get the extesnion angle of the angulus
         x2_right, y2_right = x2 + 100, y2
 
         # Draw
@@ -75,7 +83,8 @@ class poseDetector():
             if ang > 180:
                 ang = 360 - ang
         return round(ang, 2)
-
+    
+    # Given 3 points in space, calcuate the angle
     def calculateAngle(self, point1, point2, point3, acuteAngle = False):
         x1, y1 = point1[0], point1[1]
         x2, y2 = point2[0], point2[1]
@@ -86,7 +95,7 @@ class poseDetector():
             if ang > 180:
                 ang = 360 - ang
         return round(ang, 2)
-
+    
     def findDistance(self, point1, point2):
         x1, y1 = point1[0], point1[1]
         x2, y2 = point2[0], point2[1]
@@ -99,10 +108,12 @@ class poseDetector():
                   lineType = 2
                   ):
         #三个points，point 2是顶角
+        # 3 points with point 2 as angulus
         x1, y1 = point1[0], point1[1]
         x2, y2 = point2[0], point2[1]
         x3, y3 = point3[0], point3[1]
         # 根据顶角找到顶角的延伸线
+        # Get the extesnion angle of the angulus
         x2_right, y2_right = x2 + 100, y2
 
         # Draw points and lines
@@ -116,17 +127,21 @@ class poseDetector():
         cv2.circle(img, (x3, y3), 15, (13, 129, 252), 2)
 
         # 找到三角形的小于180度的角
+        # find the smaller angle (<= 180) of the 3 points
         small_angle = self.calculateAngle((x1, y1), (x2, y2), (x3, y3), acuteAngle=True)
 
         # 计算三角形边长，并且找到较长边的边长用来角度弧线的半径
+        # Calcuate the distance betwen each points, and get radius of the angle draw curve
         distance1 = self.findDistance((x1, y1), (x2, y2))
         distance2 = self.findDistance((x2, y2), (x3, y3))
         radius = int(distance1 / 3 if distance1 < distance2 else distance2 / 3)
 
         # 找到生成三角形的两个角的度数
+        # Get two angles for radius drawing
         first_angle = self.calculateAngle((x3, y3), (x2, y2), (x1, y1))
         second_angle = self.calculateAngle((x1, y1), (x2, y2), (x3, y3))
         # 由于eclipse是逆时针画的所以需要找到画圈的起始点，由于总是需要找到锐角，所以起始点有可能是point1或者是point3
+        # becasue the eclipse drawing is counter-clock wise from anlge 0, so will need to find the correct point to start which could be point 1 or point 3
         if first_angle < second_angle:
             shift_angle = self.calculateAngle((x2_right, y2_right), (x2, y2), (x3, y3))
         else:
@@ -136,9 +151,11 @@ class poseDetector():
         center_coordinates = (x2, y2)
         axesLength = (radius, radius)
         # 以中心点右侧作为angle 0
+        # use the center points as angle 0
         angle = shift_angle
         startAngle = 0
         # 总是找到锐角
+        # always find the acute angle
         endAngle = first_angle if first_angle < second_angle else second_angle
         # Red color in BGR
         color = (13, 129, 252)
