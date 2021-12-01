@@ -180,6 +180,31 @@ class poseDetector():
                     fontColor,
                     lineType)
         return img
+    
+    def determine_anlge(self):
+        
+        lmList = self.lmList
+        # Get the distance of left and right shoulder
+        left_shoulder = (lmList[11][1], lmList[11][2])
+        right_shoulder = (lmList[12][1], lmList[12][2])
+        shoulder_distance = self.findDistance(
+            left_shoulder, right_shoulder)
+
+        # Get the distance of left and right hip
+        left_hip = (lmList[23][1], lmList[23][2])
+        right_hip = (lmList[24][1], lmList[24][2])
+        hip_distance = self.findDistance(
+            left_hip, right_hip)
+
+        # Get distance between left hip and left knees
+        left_upper_leg = self.findDistance(
+            (lmList[23][1], lmList[23][2]), (lmList[25][1], lmList[25][2]))
+        right_upper_leg = self.findDistance(
+            (lmList[24][1], lmList[24][2]), (lmList[26][1], lmList[26][2]))
+        max_upper_leg = left_upper_leg if left_upper_leg > right_upper_leg else right_upper_leg
+
+        if max_upper_leg > 20 * shoulder_distance and max_upper_leg > 30 * hip_distance:
+            print("Good")
 
 
 
