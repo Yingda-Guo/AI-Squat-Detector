@@ -9,13 +9,14 @@ class poseDetector():
     def __init__(self,
                  mode=False,
                  complexity=1,
+                 enable_segmentation=False,
                  smooth=True,
                  detection_conf=0.5,
                  tracking_conf=0.5):
 
         # Load media pipe pose estimation model
         self.mpPose = mp.solutions.pose
-        self.pose = self.mpPose.Pose(mode, complexity, smooth, detection_conf, tracking_conf)
+        self.pose = self.mpPose.Pose(mode, complexity, enable_segmentation, smooth, detection_conf, tracking_conf)
         # Load utilities for drawing
         self.mpDraw = mp.solutions.drawing_utils
 
